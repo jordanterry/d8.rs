@@ -1,7 +1,11 @@
+[workspace]
+members = ["crates/classfile"]
+resolver = "3"
+
 [package]
 name = "dex_rs"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-memmap2 = "0.9"
+dex_rs_classfile = { path = "crates/classfile" }
