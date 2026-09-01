@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/classfile"]
+members = ["crates/classfile", "fuzz"]
 resolver = "3"
 
 [package]

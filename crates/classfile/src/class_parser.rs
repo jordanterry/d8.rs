@@ -1,12 +1,12 @@
-use crate::{ClassFileVersion, ClassReader, ConstantPool, ParseError, RawClassFileVersion};
 pub(crate) use crate::instruction_set::InstructionSet;
+use crate::{ClassFileVersion, ClassReader, ConstantPool, ParseError, RawClassFileVersion};
 
 pub struct ClassParser<'a> {
     pub version: ClassFileVersion,
     pub constant_pool: ConstantPool<'a>,
 }
-impl<'a> ClassParser<'a> {
 
+impl<'a> ClassParser<'a> {
     fn decode_instructions(code: &[u8], code_length: usize) -> Result<InstructionSet, ParseError> {
         let mut reader = ClassReader::new(code);
         InstructionSet::decode(&mut reader, code_length)
@@ -26,7 +26,8 @@ impl<'a> ClassParser<'a> {
                  code_length={code_length}"
             );
 
-            let instructions = ClassParser::decode_instructions(code, code_length).expect("valid JVM bytecode");
+            let instructions =
+                ClassParser::decode_instructions(code, code_length).expect("valid JVM bytecode");
 
             println!("    instructions:");
 
@@ -55,8 +56,7 @@ impl<'a> ClassParser<'a> {
 
             let length = reader.read_u32().unwrap();
 
-            let name = constant_pool.utf8(name_index)
-                .unwrap_or("<unknown>");
+            let name = constant_pool.utf8(name_index).unwrap_or("<unknown>");
 
             println!(
                 "  attribute \

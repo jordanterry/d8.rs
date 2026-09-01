@@ -1,0 +1,22 @@
+[package]
+name = "dex_rs_classfile-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+
+[dependencies.dex_rs_classfile]
+path = "../crates/classfile"
+
+[[bin]]
+name = "class_reader"
+path = "fuzz_targets/class_reader.rs"
+test = false
+doc = false
+bench = false

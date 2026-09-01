@@ -1,4 +1,4 @@
-use crate::class_file_version::VersionError;
+pub(crate) use crate::class_file_version::VersionError;
 
 /// Not sure if this is right, but this is a catch-all for all parsing errors.
 /// I ended up with some duplication of the ParseError type before this.
@@ -62,16 +62,16 @@ impl<'a> ClassReader<'a> {
     }
 
     pub fn read_bytes(&mut self, len: usize) -> Result<&'a [u8], ParseError> {
-        let start = self.offset;
+        let offset = self.offset;
 
-        let end = start
+        let end = offset
             .checked_add(len)
-            .ok_or(ParseError::UnexpectedEof { offset: start })?;
+            .ok_or_else(|| ParseError::UnexpectedEof { offset })?;
 
         let bytes = self
             .bytes
-            .get(start..end)
-            .ok_or(ParseError::UnexpectedEof { offset: start })?;
+            .get(offset..end)
+            .ok_or_else(|| ParseError::UnexpectedEof { offset })?;
 
         self.offset = end;
 
