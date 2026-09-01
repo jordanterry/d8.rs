@@ -5,7 +5,6 @@ pub struct ClassParser<'a> {
     pub version: ClassFileVersion,
     pub constant_pool: ConstantPool<'a>,
 }
-
 impl<'a> ClassParser<'a> {
     fn decode_instructions(code: &[u8], code_length: usize) -> Result<InstructionSet, ParseError> {
         let mut reader = ClassReader::new(code);
