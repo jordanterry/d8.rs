@@ -7,6 +7,10 @@ pub enum ParseError {
     UnexpectedEof { offset: usize },
     InvalidMagic { found: u32 },
     InvalidVersion(VersionError),
+    InvalidConstantPoolTag { offset: usize, tag: u8 },
+    InvalidConstantPoolLayout { offset: usize },
+
+    InvalidOpcode { opcode: u8 },
 }
 
 pub struct ClassReader<'a> {
@@ -29,20 +33,32 @@ impl<'a> ClassReader<'a> {
     }
 
     pub fn read_u8(&mut self) -> Result<u8, ParseError> {
-        let bytes = self.read_bytes(1)?;
-        Ok(bytes[0])
+        Ok(self.read_bytes(1)?[0])
     }
 
     pub fn read_u16(&mut self) -> Result<u16, ParseError> {
-        let bytes = self.read_bytes(2)?;
+        let bytes: [u8; 2] = self
+            .read_bytes(2)?
+            .try_into()
+            .expect("read_bytes guaranteed length of 2");
 
-        Ok(u16::from_be_bytes([bytes[0], bytes[1]]))
+        Ok(u16::from_be_bytes(bytes))
     }
 
     pub fn read_u32(&mut self) -> Result<u32, ParseError> {
-        let bytes = self.read_bytes(4)?;
+        let bytes: [u8; 4] = self
+            .read_bytes(4)?
+            .try_into()
+            .expect("read_bytes guaranteed length of 4");
+        Ok(u32::from_be_bytes(bytes))
+    }
 
-        Ok(u32::from_be_bytes([bytes[0], bytes[1], bytes[2], bytes[3]]))
+    pub fn read_u64(&mut self) -> Result<u64, ParseError> {
+        let bytes: [u8; 8] = self
+            .read_bytes(8)?
+            .try_into()
+            .expect("read_bytes guaranteed length of 8");
+        Ok(u64::from_be_bytes(bytes))
     }
 
     pub fn read_bytes(&mut self, len: usize) -> Result<&'a [u8], ParseError> {
@@ -102,6 +118,16 @@ mod tests {
 
         assert_eq!(value, 0xCAFEBABE);
         assert_eq!(reader.offset(), 4);
+    }
+
+    #[test]
+    fn reads_u64_as_big_endian() {
+        let mut reader = ClassReader::new(&[0xCA, 0xFE, 0xBA, 0xBE, 0xAA, 0xBB, 0xCC, 0xDD]);
+
+        let value = reader.read_u64().unwrap();
+
+        assert_eq!(value, 0xCAFEBABEAABBCCDD);
+        assert_eq!(reader.offset(), 8);
     }
 
     #[test]
